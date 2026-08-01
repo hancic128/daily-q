@@ -1,0 +1,28 @@
+[package]
+name = "daily-q"
+version = "0.1.0"
+edition = "2024"
+description = "每日一题 CLI：面向后端/数据方向程序员的 AI 面试练习工具"
+license = "MIT"
+repository = "https://github.com/Angryshark128/daily-q"
+readme = "README.md"
+keywords = ["interview", "quiz", "cli", "llm", "study"]
+categories = ["command-line-utilities"]
+
+# 可执行文件名为 dq
+[[bin]]
+name = "dq"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+chrono = "0.4"
+clap = { version = "4.6.5", features = ["derive"] }
+colored = "2"
+dirs = "6"
+reqwest = { version = "0.13.4", features = ["json"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }

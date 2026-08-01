@@ -1,0 +1,114 @@
+name: Release
+
+# 手动触发，或推送 v* 标签时自动发布
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-apple-darwin     # macOS Intel
+            os: macos-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin    # macOS Apple Silicon
+            os: macos-latest
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc  # Windows 64 位
+            os: windows-latest
+            archive: zip
+          - target: i686-pc-windows-msvc    # Windows 32 位
+            os: windows-latest
+            archive: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (${{ matrix.target }})
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          # 不同 target 的产物在 target/<triple>/ 下，按 triple 隔离缓存
+          workspaces: target/${{ matrix.target }}
+
+      - name: Build release binary
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Stage files
+        shell: bash
+        run: |
+          BIN="dq"
+          [[ "${{ runner.os }}" == "Windows" ]] && BIN="dq.exe"
+          mkdir -p dist
+          cp "target/${{ matrix.target }}/release/$BIN" dist/
+          cp README.md LICENSE dist/
+
+      - name: Create archive
+        shell: bash
+        run: |
+          cd dist
+          if [[ "${{ matrix.archive }}" == "tar.gz" ]]; then
+            tar -czf "../daily-q-${{ matrix.target }}.tar.gz" *
+          else
+            7z a -tzip "../daily-q-${{ matrix.target }}.zip" *
+          fi
+
+      - name: Generate SHA-256 checksum
+        shell: bash
+        run: |
+          if [[ "${{ matrix.archive }}" == "tar.gz" ]]; then
+            FILE="daily-q-${{ matrix.target }}.tar.gz"
+          else
+            FILE="daily-q-${{ matrix.target }}.zip"
+          fi
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            shasum -a 256 "$FILE" > "$FILE.sha256"
+          else
+            sha256sum "$FILE" > "$FILE.sha256"
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-q-${{ matrix.target }}
+          path: daily-q-${{ matrix.target }}.*
+          if-no-files-found: error
+
+  # 各 target 构建完成后统一打 Release，避免并发创建竞态
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten and combine checksums
+        shell: bash
+        run: |
+          mkdir -p dist
+          find artifacts -type f -exec cp {} dist/ \;
+          cat dist/*.sha256 | sort > dist/checksums.txt
+          rm -f dist/*.sha256
+          ls -la dist/
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

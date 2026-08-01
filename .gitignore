@@ -1,0 +1,8 @@
+/target
+.DS_Store
+*.log
+.idea/
+*.swp
+
+# 内部开发文档（STATUS/DECISIONS/CONSTITUTION），不随开源仓库公开
+.claude/
