@@ -61,9 +61,9 @@ jobs:
         run: |
           cd dist
           if [[ "${{ matrix.archive }}" == "tar.gz" ]]; then
-            tar -czf "../daily-q-${{ matrix.target }}.tar.gz" *
+            tar -czf "../daily-q-${{ matrix.target }}.tar.gz" ./*
           else
-            7z a -tzip "../daily-q-${{ matrix.target }}.zip" *
+            7z a -tzip "../daily-q-${{ matrix.target }}.zip" ./*
           fi
 
       - name: Generate SHA-256 checksum
