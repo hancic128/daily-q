@@ -93,10 +93,10 @@ fn extract_json(raw: &str) -> &str {
         }
     }
     // 3. 从第一个 { 或 [ 提取到括号闭合（容忍前后文本）
-    if let Some(start) = raw.find(['{', '[']) {
-        if let Some(end) = matching_close(raw, start) {
-            return raw[start..=end].trim();
-        }
+    if let Some(start) = raw.find(['{', '['])
+        && let Some(end) = matching_close(raw, start)
+    {
+        return raw[start..=end].trim();
     }
     // 4. 原样 trim
     raw.trim()

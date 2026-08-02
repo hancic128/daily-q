@@ -100,12 +100,12 @@ pub async fn answer_interactive() -> Result<()> {
     println!(
         "{} {}",
         display::label(TEXTS.feedback_label()),
-        &judge.feedback
+        judge.feedback
     );
     println!(
         "{} {}",
         display::label(TEXTS.reference_label()),
-        &q.reference_answer
+        q.reference_answer
     );
 
     // 等待后台总结落库（否则进程退出线程被杀死）
@@ -205,16 +205,16 @@ pub fn show_question(session: &QuizSession) {
         display::dim(&q.difficulty)
     );
     println!("{}", q.content);
-    if session.answered {
-        if let Some(a) = &session.answer {
-            println!();
-            println!(
-                "{} {}",
-                display::label(TEXTS.score_label()),
-                display::highlight(&a.score.to_string())
-            );
-            println!("{} {}", display::label(TEXTS.feedback_label()), &a.feedback);
-        }
+    if session.answered
+        && let Some(a) = &session.answer
+    {
+        println!();
+        println!(
+            "{} {}",
+            display::label(TEXTS.score_label()),
+            display::highlight(&a.score.to_string())
+        );
+        println!("{} {}", display::label(TEXTS.feedback_label()), a.feedback);
     }
 }
 
