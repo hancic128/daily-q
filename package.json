@@ -1,0 +1,27 @@
+{
+  "name": "daily-q",
+  "version": "1.0.0",
+  "description": "> 每日一题 · 面向后端/数据方向程序员的面试知识练习 CLI",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hancic128/daily-q.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hancic128/daily-q/issues"
+  },
+  "homepage": "https://github.com/hancic128/daily-q#readme",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
